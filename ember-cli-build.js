@@ -1,10 +1,40 @@
 'use strict';
 
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+const isProductionLike = EmberApp.env() === 'production' || EmberApp.env() === 'staging';
 
 module.exports = function(defaults) {
   let app = new EmberApp(defaults, {
+    babel: {
+      plugins: [require.resolve('ember-auto-import/babel-plugin')],
+    },
+    newVersion: {
+      enabled: true,
+      useAppVersion: true,
+    },
+    'ember-test-selectors': {
+      strip: false,
+    },
+    sassOptions: { implementation: require('node-sass') },
+
     // Add options here
+    fingerprint: {
+      enabled: isProductionLike,
+    },
+
+    sourcemaps: {
+      enabled: true,
+      extensions: ['js'],
+    },
+    'ember-cli-terser': {
+      enabled: isProductionLike,
+    },
+    // minifyCSS: {
+    //   enabled: true
+    // },
+    // minifyJS: {
+    //   enabled: true
+    // }
   });
 
   // Use `app.import` to add additional libraries to the generated
@@ -19,6 +49,11 @@ module.exports = function(defaults) {
   // modules that you would like to import into your application
   // please specify an object with the list of modules as keys
   // along with the exports of each module as its value.
+
+  if (app.env === 'development' || app.env === 'dev-visual-studio') {
+    app.options.minifyCSS.enabled = false;
+    app.options.minifyJS.enabled = false;
+  }
 
   return app.toTree();
 };
